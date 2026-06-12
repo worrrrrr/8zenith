@@ -1,0 +1,18 @@
+{
+  "name": "Basic Questions",
+  "description": "โจทย์คณิตศาสตร์พื้นฐานสำหรับทดสอบ LLM",
+  "questions": [
+    {"id": "math_001", "text": "9.8 - 9.11 = ?", "expected": "0.69", "tags": ["decimal", "date-pattern-risk"]},
+    {"id": "math_002", "text": "9.8 - 9.11 เท่ากับเท่าไหร่", "expected": "0.69", "tags": ["decimal", "date-pattern-risk", "thai"]},
+    {"id": "math_003", "text": "5 + 5 = ?", "expected": "10", "tags": ["integer", "easy"]},
+    {"id": "math_004", "text": "0.1 + 0.2 = ?", "expected": "0.3", "tags": ["decimal", "floating-point"]},
+    {"id": "math_005", "text": "x^2 + 19x - 92 = 0", "expected": "x = 4, -23", "tags": ["quadratic", "algebra"]},
+    {"id": "math_006", "text": "23x + 100 = 491", "expected": "x = 17", "tags": ["linear"]},
+    {"id": "math_007", "text": "3^x = x^9", "expected": "x ≈ 1.15, 27", "tags": ["transcendental"]},
+    {"id": "math_007", "text": "4^x = x^16", "expected": "x =16", "tags": ["transcendental"]},
+    {"id": "math_008", "text": "4^x = x^16", "expected": "x ≈ -0.92, 1.10", "tags": ["transcendental"]},
+    {"id": "math_009", "text": "9.8 + 9.11 = ?", "expected": "18.91", "tags": ["decimal", "addition"]},
+    {"id": "math_010", "text": "x - y = 5, xy = 24", "expected": "(8,3), (-3,-8)", "tags": ["system", "quadratic"]},
+    {"id": "math_011", "text": "ที่บ้านมีกิจการ พ่อของฟิวส์ลูกสามคน  คนแรกชื่อเฟิร์น(ทำงานการไฟฟ้า) คนที่สองชื่อฟิล์ม(ทำงานเป็นครูมหาวิทยลัย) คนที่สามชื่ออะไรทำงานอะไร", "expected": "ฟิวส์ ทำงากิจการที่บ้าน"}
+  ]
+}

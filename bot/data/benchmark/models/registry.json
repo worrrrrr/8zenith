@@ -1,0 +1,24 @@
+{
+  "models": [
+    {
+      "id": "groq-llama3.3-70b",
+      "provider": "groq",
+      "model": "llama-3.3-70b-versatile",
+      "name": "Groq / LLaMA 3.3 70B"
+    },
+    {
+      "id": "ollama-gpt-oss:120b-cloud",
+      "provider": "ollama",
+      "model": "gpt-oss:120b-cloud",
+      "name": "Ollama / gpt-oss:120b-cloud"
+    },
+    {"id": "ollama-qwen3-0.6b", "provider": "ollama", "model": "qwen3:0.6b", "name": "Ollama / Qwen 3 0.6B"},
+    {"id": "ollama-jinx", "provider": "ollama", "model": "jinx:latest", "name": "Ollama / Jinx"},
+    {
+      "id": "claude-3.5-sonnet",
+      "provider": "claude",
+      "model": "claude-3-5-sonnet-20241022",
+      "name": "Claude 3.5 Sonnet"
+    }
+  ]
+}
