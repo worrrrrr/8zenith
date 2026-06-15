@@ -1,3 +1,532 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* ==============================================
+   1. 8ZENITH DESIGN TOKENS (CSS Custom Properties)
+   ============================================== */
+:root {
+  /* --- Palette --- */
+  --color-primary: #a855f7;      /* ม่วง - Ni */
+  --color-secondary: #06b6d4;    /* ฟ้า - Fe */
+  --color-accent: #f59e0b;       /* ทอง - Eating God */
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+
+  /* --- Backgrounds --- */
+  --color-bg-base: #0f172a;      /* ดำสนิท (slate-900) */
+  --color-bg-surface: #1e1b4b;   /* ม่วงเข้ม (purple-950) */
+  --color-bg-elevated: #312e81;  /* ม่วงน้ำเงิน (indigo-950) */
+
+  /* --- Text --- */
+  --color-text-base: #f8fafc;    /* ขาวสว่าง (slate-50) */
+  --color-text-muted: #94a3b8;   /* เทาอ่านง่าย (slate-400) */
+  --color-text-inverse: #0f172a;
+
+  /* --- Borders --- */
+  --color-border: rgba(168, 85, 247, 0.2);
+  --color-border-active: rgba(168, 85, 247, 0.6);
+
+  /* --- Surfaces (theme-aware) --- */
+  --color-surface-1: rgba(255, 255, 255, 0.05);
+  --color-surface-2: rgba(255, 255, 255, 0.1);
+  --color-surface-3: rgba(255, 255, 255, 0.15);
+  --color-surface-4: rgba(0, 0, 0, 0.15);
+
+  /* --- Gradients --- */
+  --gradient-cosmic: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f172a 100%);
+  --gradient-mesh-1: radial-gradient(circle at 20% 30%, rgba(168,85,247,0.25) 0%, transparent 50%);
+  --gradient-mesh-2: radial-gradient(circle at 80% 70%, rgba(6,182,212,0.2) 0%, transparent 50%);
+  --gradient-mesh-3: radial-gradient(circle at 50% 50%, rgba(245,158,11,0.1) 0%, transparent 60%);
+
+  /* --- Shadows --- */
+  --shadow-glow-primary: 0 0 20px rgba(168, 85, 247, 0.4);
+  --shadow-glow-accent: 0 0 20px rgba(245, 158, 11, 0.4);
+  --shadow-card: 0 4px 30px rgba(0, 0, 0, 0.5);
+
+  /* --- Typography --- */
+  --font-display: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* --- Spacing & Radius --- */
+  --radius-card: 16px;
+  --radius-button: 12px;
+}
+
+/* ==============================================
+   2. THEME VARIANTS
+   ============================================== */
+
+/* ── Light — สว่าง สบายตา ── */
+[data-theme="light"] {
+  --color-primary: #7c3aed;
+  --color-secondary: #0ea5e9;
+  --color-accent: #f59e0b;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+
+  --color-bg-base: #ffffff;
+  --color-bg-surface: #f8fafc;
+  --color-bg-elevated: #f1f5f9;
+  --color-text-base: #0f172a;
+  --color-text-muted: #475569;
+  --color-border: rgba(124, 58, 237, 0.15);
+  --color-border-active: rgba(124, 58, 237, 0.45);
+
+  --color-surface-1: rgba(0, 0, 0, 0.04);
+  --color-surface-2: rgba(0, 0, 0, 0.07);
+  --color-surface-3: rgba(0, 0, 0, 0.10);
+  --color-surface-4: rgba(0, 0, 0, 0.03);
+
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.08);
+  --shadow-glow-primary: 0 0 16px rgba(124, 58, 237, 0.2);
+}
+
+/* ── Dark (default) — ลึก สงบ ── */
+[data-theme="dark"] {
+  --color-bg-base: #0f172a;
+  --color-bg-surface: #1e1b4b;
+  --color-bg-elevated: #312e81;
+  --color-text-base: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border: rgba(168, 85, 247, 0.2);
+  --color-border-active: rgba(168, 85, 247, 0.5);
+
+  --color-surface-1: rgba(255, 255, 255, 0.05);
+  --color-surface-2: rgba(255, 255, 255, 0.08);
+  --color-surface-3: rgba(255, 255, 255, 0.12);
+  --color-surface-4: rgba(0, 0, 0, 0.15);
+}
+
+/* ── Midnight — สนิท ล้ำลึก ── */
+[data-theme="midnight"] {
+  --color-bg-base: #020617;
+  --color-bg-surface: #0a0f1f;
+  --color-bg-elevated: #111827;
+  --color-text-base: #e2e8f0;
+  --color-text-muted: #64748b;
+  --color-border: rgba(99, 102, 241, 0.25);
+  --color-border-active: rgba(99, 102, 241, 0.5);
+
+  --color-surface-1: rgba(255, 255, 255, 0.04);
+  --color-surface-2: rgba(255, 255, 255, 0.07);
+  --color-surface-3: rgba(255, 255, 255, 0.10);
+  --color-surface-4: rgba(0, 0, 0, 0.2);
+}
+
+/* ── Aurora — นุ่มนวล ฝัน ── */
+[data-theme="aurora"] {
+  --color-primary: #7c3aed;
+  --color-secondary: #14b8a6;
+  --color-accent: #f472b6;
+  --color-success: #22c55e;
+  --color-danger: #f43f5e;
+
+  --color-bg-base: #faf5ff;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #f3e8ff;
+  --color-text-base: #2d1b69;
+  --color-text-muted: #6b5b8a;
+  --color-border: rgba(124, 58, 237, 0.15);
+  --color-border-active: rgba(124, 58, 237, 0.4);
+
+  --color-surface-1: rgba(124, 58, 237, 0.04);
+  --color-surface-2: rgba(124, 58, 237, 0.07);
+  --color-surface-3: rgba(124, 58, 237, 0.10);
+  --color-surface-4: rgba(124, 58, 237, 0.04);
+}
+
+/* ── Forest — ธรรมชาติ สงบ ── */
+[data-theme="forest"] {
+  --color-primary: #22c55e;
+  --color-secondary: #14b8a6;
+  --color-accent: #eab308;
+  --color-success: #16a34a;
+  --color-danger: #ef4444;
+
+  --color-bg-base: #0f1a0f;
+  --color-bg-surface: #1a2e1a;
+  --color-bg-elevated: #1e3a1e;
+  --color-text-base: #ecfdf5;
+  --color-text-muted: #86a086;
+  --color-border: rgba(34, 197, 94, 0.2);
+  --color-border-active: rgba(34, 197, 94, 0.45);
+
+  --color-surface-1: rgba(34, 197, 94, 0.06);
+  --color-surface-2: rgba(34, 197, 94, 0.10);
+  --color-surface-3: rgba(34, 197, 94, 0.14);
+  --color-surface-4: rgba(0, 0, 0, 0.2);
+}
+
+/* ── Ocean — ลึก สดชื่น ── */
+[data-theme="ocean"] {
+  --color-primary: #3b82f6;
+  --color-secondary: #06b6d4;
+  --color-accent: #f59e0b;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+
+  --color-bg-base: #0c1929;
+  --color-bg-surface: #0f2240;
+  --color-bg-elevated: #132d56;
+  --color-text-base: #e0f2fe;
+  --color-text-muted: #7494b8;
+  --color-border: rgba(59, 130, 246, 0.22);
+  --color-border-active: rgba(59, 130, 246, 0.5);
+
+  --color-surface-1: rgba(59, 130, 246, 0.06);
+  --color-surface-2: rgba(59, 130, 246, 0.10);
+  --color-surface-3: rgba(59, 130, 246, 0.14);
+  --color-surface-4: rgba(0, 0, 0, 0.18);
+}
+
+/* ── Sunset — อบอุ่น มีพลัง ── */
+[data-theme="sunset"] {
+  --color-primary: #f59e0b;
+  --color-secondary: #ef4444;
+  --color-accent: #8b5cf6;
+  --color-success: #22c55e;
+  --color-danger: #dc2626;
+
+  --color-bg-base: #1a0f0a;
+  --color-bg-surface: #2d1810;
+  --color-bg-elevated: #3d1f15;
+  --color-text-base: #fff7ed;
+  --color-text-muted: #c49a7a;
+  --color-border: rgba(245, 158, 11, 0.22);
+  --color-border-active: rgba(245, 158, 11, 0.5);
+
+  --color-surface-1: rgba(245, 158, 11, 0.06);
+  --color-surface-2: rgba(245, 158, 11, 0.10);
+  --color-surface-3: rgba(245, 158, 11, 0.14);
+  --color-surface-4: rgba(0, 0, 0, 0.2);
+}
+
+/* ==============================================
+   3. TAILWIND @theme INTEGRATION
+   ============================================== */
+theme {
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
+  --color-bg-base: var(--color-bg-base);
+  --color-bg-surface: var(--color-bg-surface);
+  --color-bg-elevated: var(--color-bg-elevated);
+  --color-text-base: var(--color-text-base);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-surface-1: var(--color-surface-1);
+  --color-surface-2: var(--color-surface-2);
+  --color-surface-3: var(--color-surface-3);
+  --color-surface-4: var(--color-surface-4);
+}
+
+/* ==============================================
+   4. BASE LAYER
+   ============================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-base);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  h1 { font-size: 2.25rem; }
+  h2 { font-size: 1.875rem; }
+  h3 { font-size: 1.5rem; }
+
+  /* Code blocks */
+  pre, code {
+    font-family: var(--font-mono);
+  }
+}
+
+/* ==============================================
+   5. COMPONENTS LAYER
+   ============================================== */
+@layer components {
+  /* --- Cosmic Card (Glassmorphism) --- */
+  .cosmic-card {
+    background: var(--color-surface-1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s ease;
+  }
+  .cosmic-card:hover {
+    border-color: var(--color-border-active);
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  /* --- Neon Divider --- */
+  .neon-divider {
+    height: 2px;
+    border: none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-primary) 20%,
+      var(--color-secondary) 50%,
+      var(--color-accent) 80%,
+      transparent 100%
+    );
+    margin: 2rem 0;
+  }
+
+  /* --- Quantum Button --- */
+  .quantum-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-button);
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .quantum-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-glow-primary);
+  }
+  .quantum-btn:active {
+    transform: scale(0.98);
+  }
+  .quantum-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .quantum-btn:hover::after {
+    opacity: 1;
+  }
+
+  /* --- Bento Grid --- */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 120px;
+    gap: 1rem;
+  }
+  .bento-grid > * {
+    background: rgba(221, 177, 177, 0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 1rem;
+    transition: all 0.3s ease;
+  }
+  .bento-grid > *:hover {
+    border-color: var(--color-border-active);
+  }
+  .bento-grid .span-2 {
+    grid-column: span 2;
+  }
+  .bento-grid .span-3 {
+    grid-column: span 3;
+  }
+  .bento-grid .span-4 {
+    grid-column: span 4;
+  }
+  .bento-grid .row-2 {
+    grid-row: span 2;
+  }
+
+  /* --- Holy Grail 3-Layout --- */
+  .holy-grail {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: 1fr;
+    min-height: 100vh;
+  }
+  .holy-grail-left {
+    width: var(--sidebar-w, 280px);
+    background: var(--color-bg-surface);
+    border-right: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .holy-grail-main {
+    grid-column: 2;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+  }
+  .holy-grail-right {
+    width: var(--rightpane-w, 320px);
+    background: var(--color-bg-surface);
+    border-left: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (max-width: 768px) {
+    .holy-grail {
+      grid-template-columns: var(--sidebar-w, 0px) 1fr var(--rightpane-w, 0px) !important;
+    }
+    .holy-grail-main {
+      padding: 1rem;
+    }
+    .holy-grail-right {
+      padding: 0.75rem;
+    }
+  }
+
+  /* --- Gradient Mesh Background --- */
+  .bg-cosmic-mesh {
+    background: var(--gradient-cosmic);
+    position: relative;
+  }
+  .bg-cosmic-mesh::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-mesh-1), var(--gradient-mesh-2), var(--gradient-mesh-3);
+    pointer-events: none;
+  }
+
+  /* --- Sidebar --- */
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    color: var(--color-text-muted);
+    transition: all 0.2s;
+    margin-bottom: 0.25rem;
+  }
+  .sidebar-link:hover {
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--color-text-base);
+  }
+  .sidebar-link.active {
+    background: rgba(168, 85, 247, 0.15);
+    color: var(--color-primary);
+    border-left: 3px solid var(--color-primary);
+  }
+
+  /* --- Search Input --- */
+  .search-input {
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    color: var(--color-text-base);
+    width: 100%;
+    transition: all 0.3s;
+  }
+  .search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-glow-primary);
+  }
+}
+
+/* ==============================================
+   6. UTILITIES LAYER
+   ============================================== */
+@layer utilities {
+  /* --- Gradient Texts --- */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-accent {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Animations --- */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.7); }
+  }
+  .animate-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 4s linear infinite;
+  }
+
+  @keyframes ping {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 0.8; }
+  }
+  .animate-ping-soft {
+    animation: ping 2s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  .animate-breathe {
+    animation: breathe 3s ease-in-out infinite;
+  }
+}
