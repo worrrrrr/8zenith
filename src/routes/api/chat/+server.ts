@@ -1,148 +1,155 @@
 import type { RequestHandler } from './$types';
 import { GROQ_API_KEY } from '$env/static/private';
+import { error, json } from '@sveltejs/kit';
 
 // =========================================================================
-// 🧠 Universal Chat Endpoint + Meta-Prompt Control
+// 🧠 Universal Chat Endpoint
 // =========================================================================
 const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const API_KEY = GROQ_API_KEY;
 const DEFAULT_MODEL = 'llama-3.3-70b-versatile';
+const DEFAULT_MAX_TOKENS = 2048;
+const REQUEST_TIMEOUT_MS = 60_000;
+
+if (!GROQ_API_KEY) {
+	throw new Error('Missing GROQ_API_KEY in environment');
+}
 
 interface ChatMessage {
 	role: 'system' | 'user' | 'assistant';
 	content: string;
 }
 
-interface ChatRequestBody {
-	messages: ChatMessage[];
-	model?: string;
-	temperature?: number;
-	max_tokens?: number;
-	stream?: boolean;
-	// สำหรับ legacy โหราศาสตร์ ถ้ายังอยากเก็บไว้
-	astrologyData?: any;
-	message?: string;
-}
+type ChatRequest =
+	| { messages: ChatMessage[]; model?: string; temperature?: number; max_tokens?: number; stream?: boolean }
+	| { message: string; model?: string; temperature?: number; max_tokens?: number; stream?: boolean }
+	| { astrologyData: any; model?: string; temperature?: number; max_tokens?: number; stream?: boolean };
 
-export const POST: RequestHandler = async ({ request }) => {
-	try {
-		const body: ChatRequestBody = await request.json();
-		let messages: ChatMessage[] = [];
-		let model = body.model || DEFAULT_MODEL;
-		let temperature = body.temperature ?? 0.8;
-
-		// 1. กรณี Chat ปกติ: ใช้ messages ที่ส่งมาตรงๆ
-		if (body.messages && Array.isArray(body.messages)) {
-			messages = body.messages;
-		}
-
-		// 2. Legacy: รองรับ astrologyData เดิม เพื่อไม่พัง
-		else if (body.astrologyData) {
-			const d = body.astrologyData;
-			const bazi =
-				d.bazi?.pillars
-					?.map(
-						(p: any) =>
-							`${p.label} ${p.stem}${p.branch} (${p.stemTH}${p.branchTH}) ธาตุ${p.element}${p.yin} 十神:${p.shiShen}`
-					)
-					.join('\n') || '';
-
-			const astrologyMetaPrompt = `คุณคือผู้เชี่ยวชาญด้านโหราศาสตร์
+const ASTROLOGY_SYSTEM_PROMPT = `คุณคือผู้เชี่ยวชาญด้านโหราศาสตร์
 
 กฎการตอบ:
 1. ตอบยาว 15-20 ย่อหน้า มีหัวข้อชัดเจน ใช้ภาษาไทยสละสลวย
 2. ห้ามใช้คำว่าขออภัย/ขอโทษ/ไม่สามารถ
 3. ปิดท้ายด้วย <question>คำถามชวนคุยต่อ 1 ข้อ</question> เสมอ ห้ามปนกับเนื้อหา`;
-			messages = [{ role: 'system', content: astrologyMetaPrompt }];
+
+const DEFAULT_SYSTEM_PROMPT = 'คุณคือผู้ช่วย AI ที่เป็นมิตร ตอบเป็นภาษาไทย ปิดท้ายด้วย <question>คำถามชวนคุยต่อ</question> เสมอ';
+
+function buildMessages(body: ChatRequest): ChatMessage[] {
+	if ('messages' in body && body.messages?.length) {
+		return body.messages;
+	}
+	
+	if ('astrologyData' in body) {
+		// แนะนำ: ย้าย logic format bazi ไป util แยก จะได้ test ง่าย
+		return [{ role: 'system', content: ASTROLOGY_SYSTEM_PROMPT }];
+	}
+	
+	if ('message' in body && body.message) {
+		return [
+			{ role: 'system', content: DEFAULT_SYSTEM_PROMPT },
+			{ role: 'user', content: body.message }
+		];
+	}
+	
+	throw error(400, 'ต้องส่ง messages[] หรือ message หรือ astrologyData มา');
+}
+
+async function fetchWithTimeout(url: string, options: RequestInit, timeout: number) {
+	const controller = new AbortController();
+	const id = setTimeout(() => controller.abort(), timeout);
+	
+	try {
+		const response = await fetch(url, {...options, signal: controller.signal });
+		return response;
+	} finally {
+		clearTimeout(id);
+	}
+}
+
+export const POST: RequestHandler = async ({ request }) => {
+	try {
+		const body: ChatRequest = await request.json();
+		const messages = buildMessages(body);
+		
+		if (!messages.some((m) => m.role === 'user')) {
+			throw error(400, 'ต้องมี user message อย่างน้อย 1 ข้อความ');
 		}
 
-		// 3. Legacy: message เดียว
-		else if (body.message) {
-			messages = [
-				{
-					role: 'system',
-					content:
-						'คุณคือผู้ช่วย AI ที่เป็นมิตร ตอบเป็นภาษาไทย ปิดท้ายด้วย <question>คำถามชวนคุยต่อ</question> เสมอ'
+		const shouldStream = body.stream?? true;
+		
+		const response = await fetchWithTimeout(
+			API_URL,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${GROQ_API_KEY}`
 				},
-				{ role: 'user', content: body.message }
-			];
-		} else {
-			throw new Error('ต้องส่ง messages[] หรือ message หรือ astrologyData มา');
-		}
-
-		// กัน user ส่ง messages เปล่า
-		if (messages.length === 0 || !messages.some((m) => m.role === 'user')) {
-			throw new Error('ต้องมี user message อย่างน้อย 1 ข้อความ');
-		}
-
-		const response = await fetch(API_URL, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${API_KEY}`
+				body: JSON.stringify({
+					model: body.model?? DEFAULT_MODEL,
+					messages,
+					stream: shouldStream,
+					temperature: body.temperature?? 0.8,
+					max_tokens: body.max_tokens?? DEFAULT_MAX_TOKENS
+				})
 			},
-			body: JSON.stringify({
-				model,
-				messages,
-				stream: body.stream ?? true,
-				temperature,
-				max_tokens: body.max_tokens
-			})
-		});
+			REQUEST_TIMEOUT_MS
+		);
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			throw new Error(`AI Provider Error [${response.status}]: ${errorText}`);
+			throw error(response.status, `Groq API Error: ${errorText}`);
 		}
 
-		// ถ้าไม่ stream ให้ return JSON ปกติ
-		if (body.stream === false) {
-			const data = await response.json();
-			return new Response(
-				JSON.stringify({
-					success: true,
-					content: data.choices?.[0]?.message?.content || ''
-				}),
-				{
-					headers: { 'Content-Type': 'application/json' }
-				}
-			);
-		}
 
-		// Stream mode
-		const transformStream = new ReadableStream({
+		// Stream mode with error propagation
+		const stream = new ReadableStream({
 			async start(controller) {
 				const reader = response.body?.getReader();
 				const decoder = new TextDecoder();
-				if (!reader) return controller.close();
+				
+				if (!reader) {
+					controller.error(new Error('No response body'));
+					return;
+				}
 
 				let buffer = '';
-				while (true) {
-					const { value, done } = await reader.read();
-					if (done) break;
+				try {
+					while (true) {
+						const { value, done } = await reader.read();
+						if (done) break;
 
-					buffer += decoder.decode(value, { stream: true });
-					const lines = buffer.split('\n');
-					buffer = lines.pop() || '';
+						buffer += decoder.decode(value, { stream: true });
+						const lines = buffer.split('\n');
+						buffer = lines.pop()?? '';
 
-					for (const line of lines) {
-						if (!line.startsWith('data:')) continue;
-						const dataValue = line.slice(5).trim();
-						if (dataValue === '[DONE]') continue;
-						try {
-							const parsed = JSON.parse(dataValue);
-							const tokenChunk = parsed.choices?.[0]?.delta?.content;
-							if (tokenChunk) controller.enqueue(new TextEncoder().encode(tokenChunk));
-						} catch {
-							/* skip partial json */
+						for (const line of lines) {
+							if (!line.startsWith('data: ')) continue;
+							const dataValue = line.slice(6).trim();
+							if (dataValue === '[DONE]') continue;
+							
+							try {
+								const parsed = JSON.parse(dataValue);
+								const token = parsed.choices?.[0]?.delta?.content;
+								if (token) controller.enqueue(new TextEncoder().encode(token));
+								
+								// ดัก error ที่ Groq อาจส่งมากลาง stream
+								if (parsed.error) {
+									throw new Error(parsed.error.message?? 'Stream error');
+								}
+							} catch {
+								// skip partial json
+							}
 						}
 					}
+				} catch (err) {
+					controller.error(err);
+				} finally {
+					controller.close();
 				}
-				controller.close();
 			}
 		});
 
-		return new Response(transformStream, {
+		return new Response(stream, {
 			headers: {
 				'Content-Type': 'text/event-stream',
 				'Cache-Control': 'no-cache',
@@ -150,10 +157,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 		});
 	} catch (e) {
-		const message = e instanceof Error ? e.message : 'Unknown error';
-		return new Response(JSON.stringify({ success: false, error: message }), {
-			status: 500,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		if (e instanceof Response) throw e; // จาก sveltekit error()
+		
+		const message = e instanceof Error? e.message : 'Unknown error';
+		console.error('Chat endpoint error:', e);
+		return json({ success: false, error: message }, { status: 500 });
 	}
 };
