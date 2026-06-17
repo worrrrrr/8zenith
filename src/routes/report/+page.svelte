@@ -64,9 +64,27 @@
 				const jsDay = new Date(Date.UTC(birthYear, birthMonth-1, birthDay)).getUTCDay();
 				thai = { planets: thp, ascSign: getThaiZodiac(va), dayInfo: getThaiDay(jsDay) };
 
-				const gl = (n:string)=>tp.find(p=>p.name===n)?.longitude??0;
-				hdReport = calcHumanDesign(jd, { sun:gl('Sun'), earth:(gl('Sun')+180)%360, moon:gl('Moon'), mercury:gl('Mercury'), venus:gl('Venus'), mars:gl('Mars'), jupiter:gl('Jupiter'), saturn:gl('Saturn'), uranus:gl('Uranus'), neptune:gl('Neptune'), pluto:gl('Pluto'), northNode:0, southNode:180 });
-			} catch(e) { console.error(e); }
+				try {
+  const gl = (n:string) => tp.find(p => p.name === n)?.longitude ?? 0;
+  hdReport = calcHumanDesign(jd, {
+    sun: gl('Sun'),
+    earth: (gl('Sun') + 180) % 360,
+    moon: gl('Moon'),
+    mercury: gl('Mercury'),
+    venus: gl('Venus'),
+    mars: gl('Mars'),
+    jupiter: gl('Jupiter'),
+    saturn: gl('Saturn'),
+    uranus: gl('Uranus'),
+    neptune: gl('Neptune'),
+    pluto: gl('Pluto'),
+    northNode: 0,
+    southNode: 180
+  });
+} catch(e) {
+  console.error(e);
+}
+
 		}
 		report = { chinese, western, vedic, thai, hd: hdReport };
 		const res = await fetch('/api/deepseek', { method:'POST', body: JSON.stringify({ birth:{year:birthYear,month:birthMonth,day:birthDay,hour:birthHour,minute:birthMinute,lat,lng}, western:western?.planets, vedic, thai, baZi:chinese.eightChar, lunar:chinese.lunar, nineStar:chinese.nineStar, taoist:chinese.taoist, humanDesign:hdReport }) });
